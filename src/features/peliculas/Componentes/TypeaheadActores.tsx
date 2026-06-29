@@ -1,18 +1,22 @@
-import { Typeahead } from "react-bootstrap-typeahead";
+import { AsyncTypeahead } from "react-bootstrap-typeahead";
 import type ActorPelicula from "../modelos/ActorPelicula";
 import { useState } from "react";
+import clienteAPI from "../../../api/ClienteAxios";
 
 export default function TypeaheadActores(props: TypeaheadActoresProps) {
 
-    const actores: ActorPelicula[] = [{
-        id: 1, nombre: "Tom Holland", personaje: "", foto: "https://th.bing.com/th/id/OIP.-55qeefiytunq26WTBog6QHaLG?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3"
-    },
-    { id: 2, nombre: "Marisa Tomei", personaje: "", foto: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Marisa_Tomei_Photo_Op_GalaxyCon_Raleigh_2024_%28cropped%29.jpg/960px-Marisa_Tomei_Photo_Op_GalaxyCon_Raleigh_2024_%28cropped%29.jpg" },
-    {
-        id: 3, nombre: "Tom Hanks", personaje: "", foto: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/TomHanksPrincEdw031223_%2811_of_41%29_%28cropped%29.jpg/960px-TomHanksPrincEdw031223_%2811_of_41%29_%28cropped%29.jpg",
+    const [actores, setActores] = useState<ActorPelicula[]>([]);
+    const [cargando, setCargando] = useState(false);
 
+    function manejarBusqueda(query: string) {
+        setCargando(true);
+
+        clienteAPI.get<ActorPelicula[]>(`/actores/${query}`)
+            .then(res => {
+                setActores(res.data);
+                setCargando(false);
+            })
     }
-    ]
 
     const seleccion: ActorPelicula[] = [];
 
@@ -40,11 +44,14 @@ export default function TypeaheadActores(props: TypeaheadActoresProps) {
     return (
         <>
             <label>Actores</label>
-            <Typeahead
+            <AsyncTypeahead
+                isLoading={cargando}
+                onSearch={manejarBusqueda}
                 id="typeahead"
                 onChange={(actores: any[]) => {
                     const actorSeleccionado = actores[0] as ActorPelicula;
                     if (props.actores.findIndex(x => x.id == actorSeleccionado.id) == -1) {
+                        actorSeleccionado.personaje = '';
                         props.onAdd([...props.actores, actorSeleccionado])
                     }
                 }}
@@ -97,7 +104,7 @@ export default function TypeaheadActores(props: TypeaheadActoresProps) {
                         </div>
 
                         <div className="flex-grow-1 mx-3">
-                            <input className="form-control" 
+                            <input className="form-control"
                                 placeholder="personaje" type="text" value={actor.personaje}
                                 onChange={e => {
                                     props.onCambioPersonaje(actor.id, e.currentTarget.value)

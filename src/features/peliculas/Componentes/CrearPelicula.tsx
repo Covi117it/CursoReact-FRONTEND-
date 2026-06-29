@@ -1,37 +1,55 @@
-import type {SubmitHandler } from "react-hook-form";
+import type { SubmitHandler } from "react-hook-form";
 import FormularioPelicula from "./FormularioPelicula";
 import type PeliculasCreacion from "../modelos/PeliculaCreacion.model";
 import type Genero from "../../generos/moelos/Genero.model";
 import type Cine from "../../cines/modelos/Cine.model";
+import { useEffect, useState } from "react";
+import clienteAPI from "../../../api/ClienteAxios";
+import type PeliculasPostGet from "../modelos/PeliculasPostGet";
+import Cargando from "../../../componentes/cargando";
+import { useNavigate } from "react-router";
+import convertirPeliculaCreacionAFormData from "../utilidades/convertirPeliculaCreacionAFormData";
+import { extraerErrores } from "../../../utilidades/Extraererrores";
+import type { AxiosError } from "axios";
+import type Pelicula from "../modelos/pelicula.model";
 
 export default function CrearPelicula() {
 
-    const onSubmit: SubmitHandler<PeliculasCreacion> = async(data) =>{
-        console.log("creando pelicula...");
-        await new Promise(resolve => setTimeout(resolve, 500));
-        console.log(data);
+    const navigate = useNavigate();
+    const [generosNoSeleccionados, setGenerosNoSeleccionados] = useState<Genero[]>([]);
+    const [cinesNoSeleccionados, setCinesNoSeleccionados] = useState<Cine[]>([]);
+    const [cargando, setCargando] = useState(true);
+    const [errores, setErrores] = useState<string[]>([])
+
+    useEffect(() => {
+        clienteAPI.get<PeliculasPostGet>(`/peliculas/postget`).then(res => {
+            setGenerosNoSeleccionados(res.data.generos);
+            setCinesNoSeleccionados(res.data.cines);
+            setCargando(false);
+        });
+    }, [])
+
+    const onSubmit: SubmitHandler<PeliculasCreacion> = async (data) => {
+        try {
+            const formData = convertirPeliculaCreacionAFormData(data);
+           const respuesta = await clienteAPI.post<Pelicula>('/peliculas', formData);
+            navigate(`/peliculas/${respuesta.data.id}`);
+        }
+        catch (err) {
+            const errores = extraerErrores(err as AxiosError);
+            setErrores(errores);
+        }
     }
-
-    const generosSeleccionados: Genero[] = [];
-    const generosNoSeleccionados: Genero[] = 
-    [{id: 1, nombre: "Accion"}, 
-        {id: 2, nombre: "Drama"}, 
-        {id: 3, nombre: "Comedia"}]
-
-    const cinesSeleccionados: Cine[] = [];
-    const cinesNoSeleccionados: Cine[] = [
-        {id: 1, nombre: "Agora", latitud: 0, longitud: 0},
-        {id: 2, nombre: "Sambil", latitud: 0, longitud: 0}
-    ];
 
     return (
         <>
-        <h3>Crear Pelicula</h3>
-        <FormularioPelicula onSubmit={onSubmit} generosNoSeleccionados={generosNoSeleccionados}
-        generosSeleccionados={generosSeleccionados}
-        cinesSeleccionados={cinesSeleccionados} cinesNoSeleccionados={cinesNoSeleccionados}
-        actoresSeleccionados={[]}
-        />
+            <h3>Crear Pelicula</h3>
+            {cargando ? <Cargando /> : <FormularioPelicula
+                errores={errores}
+                onSubmit={onSubmit} generosNoSeleccionados={generosNoSeleccionados}
+                generosSeleccionados={[]}
+                cinesSeleccionados={[]} cinesNoSeleccionados={cinesNoSeleccionados}
+                actoresSeleccionados={[]} />}
         </>
     )
 }

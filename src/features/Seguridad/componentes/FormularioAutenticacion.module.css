@@ -1,0 +1,106 @@
+.contenedor {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/bg-login.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #ffffff;
+}
+
+.tarjeta {
+    width: 100%;
+    max-width: 480px;
+    padding: 3.5rem 2.5rem;
+    background-color: rgba(30, 30, 30, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    display: flex;
+    flex-direction: column;
+}
+
+.grupoForm {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.8rem;
+}
+
+.label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 0.4rem;
+    font-weight: 300;
+}
+
+.input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    font-size: 1rem;
+    padding: 0.4rem 0;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.input:focus {
+    border-bottom-color: #ffffff;
+}
+
+.boton {
+    width: 100%;
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    padding: 0.75rem;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 1.2rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-weight: 400;
+}
+
+.boton:hover:not(:disabled) {
+    background-color: #ffffff;
+    color: #1a1a1a;
+}
+
+.boton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.enlaceAlternativo {
+    display: block;
+    text-align: center;
+    background: none;
+    border: none;
+    color: #ffffff;
+    text-decoration: underline;
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    font-weight: 300;
+    transition: color 0.3s ease;
+}
+
+.enlaceAlternativo:hover {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.errorTexto {
+    color: #ff8787;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    font-weight: 300;
+}

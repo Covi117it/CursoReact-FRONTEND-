@@ -1,52 +1,32 @@
 import { useState, useEffect } from "react";
 import ListadoPeliculas from "../../peliculas/Componentes/ListadoPeliculas";
-import type Pelicula from "../../peliculas/modelos/pelicula.model";
+import type LandingPageDto from "../modelos/LandingPage.DTO";
+import clienteAPI from "../../../api/ClienteAxios";
+import AlertaContext from "../../../utilidades/AlertaContext";
 
 export default function LandingPage() {
 
-    const [peliculas, setPeliculas] = useState<AppState>({});
-    
-      useEffect(() => {
-        setTimeout(() => {
-    
-          const enCines: Pelicula[] = [{
-            id: 1,
-            titulo: "El Padrino",
-            poster: "https://m.media-amazon.com/images/I/51rOnIjLqzL._AC_.jpg"
-          }, {
-            id: 2,
-            titulo: 'John Wick',
-            poster: "https://tse1.mm.bing.net/th/id/OIP.atr58Il4sHnIthvlTLZxmAHaLH?r=0&rs=1&pid=ImgDetMain&o=7&rm=3"
-          }];
-    
-            const proximosEstrenos: Pelicula[] = [{
-              id: 3,
-              titulo: "Spiderman 3",
-              poster: "https://cdn.kinocheck.com/i/w=1200/s3m42w97ej.jpg"
-            }];
-    
-          setPeliculas({
-            enCines,
-            proximosEstrenos
-          });
-    
-        }, 1000);
-      }, [])
+  const [peliculas, setPeliculas] = useState<LandingPageDto>({});
 
-    return (
-        <>
-            <h3>En cines</h3>
-            <ListadoPeliculas peliculas={peliculas.enCines} />
+  useEffect(() => {
+    cargarDatos();
+  }, [])
 
-            <h3>Próximos estrenos</h3>
-            <ListadoPeliculas peliculas={peliculas.proximosEstrenos} />
+  function cargarDatos() {
+    clienteAPI.get<LandingPageDto>("/peliculas/landing").then(res => setPeliculas(res.data));
+  }
 
-        </>
-    )
-}
+  return (
+    <>
+  
+      <AlertaContext.Provider value={() => cargarDatos()}>
+        <h3>En cines</h3>
+        <ListadoPeliculas peliculas={peliculas.enCines} />
 
-interface AppState {
-  enCines?: Pelicula[];
-  proximosEstrenos?: Pelicula[];
+        <h3>Próximos estrenos</h3>
+        <ListadoPeliculas peliculas={peliculas.proximosEstrenos} />
+      </AlertaContext.Provider>
+    </>
+  )
 }
 

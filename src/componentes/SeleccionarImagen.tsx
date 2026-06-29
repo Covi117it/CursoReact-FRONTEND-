@@ -1,5 +1,4 @@
 import { useState, type ChangeEvent } from "react";
-import styles from './SeleccionarImagen.module.css'
 
 export default function SeleccionarImagen(props: SeleccionarImagenProps) {
 

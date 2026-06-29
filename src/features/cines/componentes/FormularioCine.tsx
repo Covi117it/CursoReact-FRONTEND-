@@ -7,6 +7,7 @@ import Boton from "../../../componentes/Boton";
 import { NavLink } from "react-router";
 import Mapa from "../../../componentes/Mapa/Mapa";
 import type Coordenada from "../../../componentes/Mapa/Coordenada.model";
+import MostrarErrores from "../../../componentes/MostrarErrores";
 
 export default function FormularioCine(props: FormularioCineProps) {
 
@@ -34,6 +35,7 @@ export default function FormularioCine(props: FormularioCineProps) {
 
     return (
         <>
+        <MostrarErrores errores={props.errores}/>
             <form onSubmit={handleSubmit(props.onSubmit)}>
                 <div className="form-group">
                     <label htmlFor="nombre">Nombre</label>
@@ -45,6 +47,7 @@ export default function FormularioCine(props: FormularioCineProps) {
 
                     <div className="mt-4">
                         <Mapa
+                        editable={true}
                             coordenadas={transformarCoordenadas()}
                         lugarSeleccionado={coordenada => {
                             setValue("latitud", coordenada.lat, {
@@ -70,6 +73,7 @@ export default function FormularioCine(props: FormularioCineProps) {
 interface FormularioCineProps{
     modelo?: CineCreacion;
     onSubmit: SubmitHandler<CineCreacion>;
+    errores: string[];
 }
 
 const reglasDeValidacion = yup.object({

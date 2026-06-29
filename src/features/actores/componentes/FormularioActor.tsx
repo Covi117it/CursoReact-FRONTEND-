@@ -6,6 +6,7 @@ import * as yup from "yup";
 import { fechaNopuedeSerFutura, primeraLetraMayuscula } from "../../../Validaciones/Validaciones";
 import { yupResolver } from "@hookform/resolvers/yup";
 import SeleccionarImagen from "../../../componentes/SeleccionarImagen";
+import MostrarErrores from "../../../componentes/MostrarErrores";
 
 export default function FormularioActor(props: FormularioActorProps) {
 
@@ -24,6 +25,7 @@ export default function FormularioActor(props: FormularioActorProps) {
 
     return (
         <>
+        <MostrarErrores errores={props.errores}/>
             <form onSubmit={handleSubmit(props.onSubmit)}>
                 <div className="form-group">
                     <label htmlFor="nombre">Nombre</label>
@@ -55,6 +57,7 @@ export default function FormularioActor(props: FormularioActorProps) {
 interface FormularioActorProps {
     modelo?: ActorCreacion;
     onSubmit: SubmitHandler<ActorCreacion>
+    errores: string[];
 }
 
 const reglasDeValidacion = yup.object({

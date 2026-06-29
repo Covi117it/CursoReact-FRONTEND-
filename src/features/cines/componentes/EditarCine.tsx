@@ -1,30 +1,39 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router"
+import { useNavigate, useParams } from "react-router"
 import type CineCreacion from "../modelos/CineCreacion.Model";
 import FormularioCine from "./FormularioCine";
 import type { SubmitHandler } from "react-hook-form";
 import Cargando from "../../../componentes/cargando";
+import clienteAPI from "../../../api/ClienteAxios";
+import type Cine from "../modelos/Cine.model";
+import { extraerErrores } from "../../../utilidades/Extraererrores";
+import type { AxiosError } from "axios";
 
-export default function     EditarCine() {
+export default function EditarCine() {
 
+    const navigate = useNavigate();
     const { id } = useParams();
     const [modelo, setModelo] = useState<CineCreacion | undefined>(undefined);
+    const [errores, setErrores] = useState<string[]>([]);
     useEffect(() => {
-        setTimeout(() => {
-            setModelo({nombre: "Agora Mall2", latitud: 18.48340642793992, longitud: -69.93975877761842})
-        }, 1000)
-    }, [id]);
+        clienteAPI.get<Cine>(`/cines/${id}`).then(res => setModelo(res.data))
+            .catch(() => navigate("/cine"))
+    }, [id, navigate]);
 
     const onSubmit: SubmitHandler<CineCreacion> = async (data) => {
-            console.log("editar el cine...");
-            await new Promise(resolve => setTimeout(resolve, 500));
-            console.log(data);
-        };
+        try {
+            await clienteAPI.put(`/cines/${id}`, data);
+            navigate("/cines");
+        } catch (err) {
+            const errores = extraerErrores(err as AxiosError);
+            setErrores(errores)
+        }
+    };
 
     return (
         <>
             <h3>Editar Cine</h3>
-            {modelo ? <FormularioCine modelo={modelo} onSubmit={onSubmit}/> : <Cargando/>}
+            {modelo ? <FormularioCine errores={errores} modelo={modelo} onSubmit={onSubmit} /> : <Cargando />}
         </>
     )
 }

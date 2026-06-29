@@ -4,49 +4,59 @@ import type PeliculasCreacion from "../modelos/PeliculaCreacion.model";
 import FormularioPelicula from "./FormularioPelicula";
 import type { SubmitHandler } from "react-hook-form";
 import Cargando from "../../../componentes/cargando";
-import type Genero from "../../generos/moelos/Genero.model";
-import type Cine from "../../cines/modelos/Cine.model";
-import type ActorPelicula from "../modelos/ActorPelicula";
+import type PeliculasPutGet from "../modelos/PeliculasPutGet";
+import { useNavigate } from "react-router";
+import clienteAPI from "../../../api/ClienteAxios";
+import FormatearFecha from "../../../utilidades/FormatearFecha";
+import convertirPeliculaCreacionAFormData from "../utilidades/ConvertirpeliculaCreacionAFormData";
+import { extraerErrores } from "../../../utilidades/Extraererrores";
+import type { AxiosError } from "axios";
 
 export default function EditarPelicula() {
 
     const [modelo, setModelo] = useState<PeliculasCreacion | undefined>(undefined);
+    const [peliculaPutGet, setPeliculaPutGet] = useState<PeliculasPutGet>();
     const { id } = useParams();
+    const [errores, setErrores] = useState<string[]>([]);
+    const navigate = useNavigate();
 
-    const onSubmit: SubmitHandler<PeliculasCreacion> = async(data) =>{
-            console.log("editar pelicula...");
-            await new Promise(resolve => setTimeout(resolve, 500));
-            console.log(data);
+    const onSubmit: SubmitHandler<PeliculasCreacion> = async (data) => {
+        try {
+            const formData = convertirPeliculaCreacionAFormData(data);
+            await clienteAPI.putForm(`/peliculas/${id}`, formData);
+            navigate(`/peliculas/${id}`);
+
+        } catch (err) {
+            const errores = extraerErrores(err as AxiosError);
+            setErrores(errores);
         }
-
-        const generosSeleccionados: Genero[] = [{id: 1, nombre: "Amor"}];
-        const generosNoSeleccionados: Genero[] = [{id: 1, nombre: "Accion"}, {id: 1, nombre: "Comedia"}, {id: 3, nombre: "Romcom"}]
-
-         const cinesSeleccionados: Cine[] = [{id: 1, nombre: "Agora", latitud: 0, longitud: 0}];
-            const cinesNoSeleccionados: Cine[] = [
-                {id: 2, nombre: "Sambil", latitud: 0, longitud: 0}
-            ];
-
+    }
     useEffect(() => {
-        setTimeout(() => {
-            setModelo({titulo: "Avengers" + id, fechaLanzamiento: "2020-05-11", trailer: "abc", poster: "https://th.bing.com/th/id/R.fb229445e379afa39e82c699b020f59b?rik=UK2gSD3%2b2HSRkA&pid=ImgRaw&r=0"})
-        }, 500)
-    }, [id]);
+        clienteAPI.get<PeliculasPutGet>(`/peliculas/putget/${id}`).then(res => {
+            const pelicula = res.data.pelicula;
+            const peliculaCreacion: PeliculasCreacion = {
+                titulo: pelicula.titulo,
+                fechaLanzamiento: FormatearFecha(pelicula.fechaLanzamiento),
+                poster: pelicula.poster,
+                trailer: pelicula.trailer
+            }
 
-    const actoresSeleccionados: ActorPelicula[] = [
-         { id: 2, nombre: "Marisa Tomei", personaje: "tia mey", foto: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Marisa_Tomei_Photo_Op_GalaxyCon_Raleigh_2024_%28cropped%29.jpg/960px-Marisa_Tomei_Photo_Op_GalaxyCon_Raleigh_2024_%28cropped%29.jpg" }
-    ]
+            setModelo(peliculaCreacion);
+            setPeliculaPutGet(res.data);
+        })
+    }, [id]);
 
     return (
         <>
             <h3>Editar Pelicula</h3>
-            {modelo ? <FormularioPelicula modelo={modelo} onSubmit={onSubmit}
-                generosNoSeleccionados={generosNoSeleccionados}
-                generosSeleccionados={generosSeleccionados}
-                cinesSeleccionados={cinesSeleccionados}
-                cinesNoSeleccionados={cinesNoSeleccionados}
-                actoresSeleccionados={actoresSeleccionados}
-            />: <Cargando/>}
+            {modelo && peliculaPutGet ? <FormularioPelicula errores={errores} modelo={modelo} onSubmit={onSubmit}
+                generosNoSeleccionados={peliculaPutGet.generosNoSeleccionados}
+                generosSeleccionados={peliculaPutGet.generosSeleccionados}
+                cinesSeleccionados={peliculaPutGet.cinesSeleccionados}
+                cinesNoSeleccionados={peliculaPutGet.cinesNoSeleccionados}
+                actoresSeleccionados={peliculaPutGet.actores}
+            /> : <Cargando />}
         </>
     )
 }
+
